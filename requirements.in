@@ -1,8 +1,5 @@
-fastapi[standard]
+chainlit
 sqlalchemy[asyncio]
-fastapi-users
-fastapi-users-db-sqlalchemy
-fastapi-users
 uvicorn
 pre-commit
 pytest-coverage
@@ -12,3 +9,4 @@ openai
 structlog
 tenacity
 asyncpg
+aiohttp

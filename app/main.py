@@ -2,24 +2,24 @@ from __future__ import annotations
 
 import asyncio
 
+from chainlit.utils import mount_chainlit
 from fastapi import FastAPI
 
-from app.agent.demon import consume_responses_websockets
-from app.agent.llm_worker_generic import llm_worker_generic
-from app.auth.db import create_db_and_tables
-from app.auth.logic import auth_backend, fastapi_users
-from app.auth.schemas import UserCreate, UserRead
+from app.frontend_api.chats.demon import consume_responses_futures
+from app.backend_api.llm_worker.llm_worker_generic import llm_worker_generic
+# from app.frontend_api.auth.db import create_db_and_tables
+# from app.frontend_api.auth.logic import auth_backend, fastapi_users
+# from app.frontend_api.auth.schemas import UserCreate, UserRead
 from app.logger import setup_logging
 from app.settings import get_settings
-from app.state import active_connections
-from app.test_app.views import test_app_router
 
 settings = get_settings()
 
 
 async def start_demons():
-    asyncio.create_task(llm_worker_generic())
-    asyncio.create_task(consume_responses_websockets(active_connections=active_connections))
+    # asyncio.create_task(llm_worker_generic()
+    asyncio.create_task(consume_responses_futures())
+
 
 def get_application() -> FastAPI:
     setup_logging(settings=settings)
@@ -33,18 +33,18 @@ def get_application() -> FastAPI:
         title='Starter FastApi with FastApi users',
     )
 
-    app.include_router(
-        fastapi_users.get_auth_router(auth_backend), prefix='/api/auth/jwt', tags=['auth']
-    )
-    app.include_router(
-        fastapi_users.get_register_router(UserRead, UserCreate),
-        prefix='/api/auth',
-        tags=['auth'],
-    )
-    app.include_router(test_app_router, prefix='/api/test')
-
-    app.add_event_handler('startup', create_db_and_tables)
+    # app.include_router(
+    #     fastapi_users.get_auth_router(auth_backend), prefix='/api/auth/jwt', tags=['auth']
+    # )
+    # app.include_router(
+    #     fastapi_users.get_register_router(UserRead, UserCreate),
+    #     prefix='/api/auth',
+    #     tags=['auth'],
+    # )
+    # app.add_event_handler('startup', create_db_and_tables)
     app.add_event_handler('startup', start_demons)
+
+    mount_chainlit(app=app, target="app/frontend_api/chats/chainlit.py", path="/api/chat")
 
     return app
 

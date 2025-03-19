@@ -1,9 +1,9 @@
 import asyncio
 
-from openai import AsyncOpenAI, OpenAI
+from openai import OpenAI, AsyncOpenAI
 
 from app.logger import logger
-from app.openai.dto import ChatCompletionRequest, CompletionRequest
+from app.utils.dto import ChatCompletionRequest, CompletionRequest
 from app.settings import get_settings
 from app.utils.consumers import KafkaTransportConsumer
 from app.utils.producers import KafkaTransportProducer
@@ -70,6 +70,23 @@ async def handle_chat_completion(
         await producer.send(event=response, headers=headers)
 
 
+async def chat_completions_streaming(
+    *,
+    client: AsyncOpenAI,
+    producer: KafkaTransportProducer,
+    request: ChatCompletionRequest,
+    headers,
+):
+    try:
+        stream = await client.chat.completions.create(**request.dict())
+    except Exception as e:
+        logger.error(f'Chat completion streaming request exception {e}')
+        return
+    headers['event_type'] = 'chat.completions.response'
+    async for chunk in stream:
+        await producer.send(event=chunk, headers=headers)
+
+
 async def handle_completion(
     client: OpenAI,
     async_client: AsyncOpenAI,
@@ -91,23 +108,6 @@ async def handle_completion(
         logger.info(f'Received response for completions.request {response}')
         headers['event_type'] = 'completions.response'
         await producer.send(event=response, headers=headers)
-
-
-async def chat_completions_streaming(
-    *,
-    client: AsyncOpenAI,
-    producer: KafkaTransportProducer,
-    request: ChatCompletionRequest,
-    headers,
-):
-    try:
-        stream = await client.chat.completions.create(**request.dict())
-    except Exception as e:
-        logger.error(f'Chat completion streaming request exception {e}')
-        return
-    headers['event_type'] = 'chat.completions.response'
-    async for chunk in stream:
-        await producer.send(event=chunk, headers=headers)
 
 
 async def completions_streaming(

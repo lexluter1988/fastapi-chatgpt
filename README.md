@@ -4,6 +4,7 @@ This is FastAPI application with LLM worker daemon running separately.
 
 Services are communicating via Kafka messaging bus.
 
+Chat is implemented by chainlit
 
 ## Author
 
@@ -49,9 +50,9 @@ UI is accessible on http://127.0.0.1:8080/
 
 ## SwaggerUI
 
-Visit the http://127.0.0.1:8000/docs
+Visit the http://127.0.0.1:8000/api/docs
 
 
-## Simple Websockets Chat
+## Chainlit AI Chat
 
-Visit the http://127.0.0.1:8000/api/test/test-app/
+Visit the http://127.0.0.1:8000/api/chat/

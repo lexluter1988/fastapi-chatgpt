@@ -9,6 +9,6 @@ WORKDIR /app
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-COPY . .
+COPY . /app
 
-CMD ["python", "-m", "app.agent.llm_worker_generic"]
+CMD ["python", "-m", "app.backend_api.llm_worker.llm_worker_generic"]

@@ -7,7 +7,7 @@ from pydantic import ValidationError
 from tenacity import retry, stop_after_attempt, wait_fixed
 
 from app.logger import logger
-from app.openai.dto import (
+from app.utils.dto import (
     ChatCompletionRequest,
     ChatCompletionResponse,
     CompletionRequest,
